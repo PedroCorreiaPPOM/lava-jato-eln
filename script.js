@@ -26,7 +26,7 @@ function buildWhatsAppUrl(message){
 }
 
 // Preenche todos os links marcados com data-whatsapp-link
-document.querySelectorAll("[data-whatsapp-link]").forEach(el=>{
+document.querySelectorAll("[data-whatsapp-link]").forEach(function(el){
   el.setAttribute("href", buildWhatsAppUrl(WHATSAPP_DEFAULT_MESSAGE));
   el.setAttribute("target", "_blank");
   el.setAttribute("rel", "noopener");
@@ -48,13 +48,13 @@ if(mapLink){
 const navToggle = document.getElementById("navToggle");
 const mainNav = document.getElementById("mainNav");
 if(navToggle && mainNav){
-  navToggle.addEventListener("click", ()=>{
+  navToggle.addEventListener("click", function(){
     const open = mainNav.classList.toggle("open");
     navToggle.classList.toggle("open", open);
     navToggle.setAttribute("aria-expanded", open ? "true" : "false");
   });
-  mainNav.querySelectorAll("a").forEach(a=>{
-    a.addEventListener("click", ()=>{
+  mainNav.querySelectorAll("a").forEach(function(a){
+    a.addEventListener("click", function(){
       mainNav.classList.remove("open");
       navToggle.classList.remove("open");
       navToggle.setAttribute("aria-expanded", "false");
@@ -67,7 +67,7 @@ if(navToggle && mainNav){
 --------------------------------------------------------- */
 const bookingForm = document.getElementById("bookingForm");
 if(bookingForm){
-  bookingForm.addEventListener("submit", (e)=>{
+  bookingForm.addEventListener("submit", function(e){
     e.preventDefault();
     const data = new FormData(bookingForm);
     const nome = (data.get("nome") || "").toString().trim();
@@ -106,14 +106,16 @@ if(carousel){
   const slides = Array.from(carousel.querySelectorAll(".carousel-slide"));
 
   // cria os indicadores (bolinhas)
-  slides.forEach((_, i)=>{
-    const dot = document.createElement("button");
-    dot.setAttribute("aria-label", `Ir para foto ${i+1}`);
-    if(i === 0) dot.classList.add("active");
-    dot.addEventListener("click", ()=> scrollToSlide(i));
-    dotsWrap.appendChild(dot);
-  });
-  const dots = Array.from(dotsWrap.children);
+  if(dotsWrap){
+    slides.forEach(function(_, i){
+      const dot = document.createElement("button");
+      dot.setAttribute("aria-label", "Ir para foto " + (i + 1));
+      if(i === 0) dot.classList.add("active");
+      dot.addEventListener("click", function(){ scrollToSlide(i); });
+      dotsWrap.appendChild(dot);
+    });
+  }
+  const dots = dotsWrap ? Array.from(dotsWrap.children) : [];
 
   function scrollToSlide(index){
     const slide = slides[index];
@@ -124,7 +126,7 @@ if(carousel){
   function currentIndex(){
     const center = carousel.scrollLeft + carousel.clientWidth/2;
     let closest = 0, min = Infinity;
-    slides.forEach((s,i)=>{
+    slides.forEach(function(s, i){
       const c = s.offsetLeft + s.clientWidth/2;
       const d = Math.abs(c - center);
       if(d < min){ min = d; closest = i; }
@@ -133,42 +135,47 @@ if(carousel){
   }
 
   function updateDots(){
+    if(!dotsWrap) return;
     const idx = currentIndex();
-    dots.forEach((d,i)=> d.classList.toggle("active", i === idx));
+    dots.forEach(function(d, i){ d.classList.toggle("active", i === idx); });
   }
 
   let scrollTimeout;
-  carousel.addEventListener("scroll", ()=>{
+  carousel.addEventListener("scroll", function(){
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(updateDots, 80);
   }, { passive:true });
 
-  prevBtn?.addEventListener("click", ()=> scrollToSlide(Math.max(0, currentIndex()-1)));
-  nextBtn?.addEventListener("click", ()=> scrollToSlide(Math.min(slides.length-1, currentIndex()+1)));
+  if(prevBtn){
+    prevBtn.addEventListener("click", function(){ scrollToSlide(Math.max(0, currentIndex()-1)); });
+  }
+  if(nextBtn){
+    nextBtn.addEventListener("click", function(){ scrollToSlide(Math.min(slides.length-1, currentIndex()+1)); });
+  }
 
   // arrasto suave com mouse no desktop (touch já funciona nativamente via scroll-snap)
   let isDown = false, startX = 0, startScroll = 0, dragged = false;
 
-  carousel.addEventListener("mousedown", (e)=>{
+  carousel.addEventListener("mousedown", function(e){
     isDown = true; dragged = false;
     carousel.classList.add("dragging");
     startX = e.pageX;
     startScroll = carousel.scrollLeft;
   });
-  window.addEventListener("mouseup", ()=>{
+  window.addEventListener("mouseup", function(){
     if(!isDown) return;
     isDown = false;
     carousel.classList.remove("dragging");
     scrollToSlide(currentIndex());
   });
-  window.addEventListener("mousemove", (e)=>{
+  window.addEventListener("mousemove", function(e){
     if(!isDown) return;
     const delta = e.pageX - startX;
     if(Math.abs(delta) > 4) dragged = true;
     carousel.scrollLeft = startScroll - delta;
   });
   // evita clique acidental em imagem depois de arrastar
-  carousel.addEventListener("click", (e)=>{ if(dragged) e.preventDefault(); }, true);
+  carousel.addEventListener("click", function(e){ if(dragged) e.preventDefault(); }, true);
 
   updateDots();
 }
@@ -178,15 +185,15 @@ if(carousel){
 --------------------------------------------------------- */
 const revealEls = document.querySelectorAll(".reveal");
 if("IntersectionObserver" in window && revealEls.length){
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
       if(entry.isIntersecting){
         entry.target.classList.add("is-visible");
         io.unobserve(entry.target);
       }
     });
   }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
-  revealEls.forEach(el=> io.observe(el));
+  revealEls.forEach(function(el){ io.observe(el); });
 } else {
-  revealEls.forEach(el=> el.classList.add("is-visible"));
+  revealEls.forEach(function(el){ el.classList.add("is-visible"); });
 }
