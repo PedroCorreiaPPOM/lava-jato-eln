@@ -170,8 +170,9 @@ ul{ margin:0; padding:0; }
 .section-sub{ color:var(--muted); max-width:52ch; margin-bottom:2.2rem; }
 .lead{ font-size:1.2rem; color:var(--white); max-width:60ch; }
 
-.reveal{ opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s ease; }
-.reveal.is-visible{ opacity:1; transform:none; }
+.reveal{ opacity:1; transform:none; transition:opacity .6s ease, transform .6s ease; }
+html.js-ready .reveal{ opacity:0; transform:translateY(22px); }
+html.js-ready .reveal.is-visible{ opacity:1; transform:none; }
 
 /* ---------- Produtos ---------- */
 .product-track{
